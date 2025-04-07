@@ -1,6 +1,16 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+// Score
+let score = 0;
+
+// Display score
+function drawScore() {
+    ctx.fillStyle = "black";
+    ctx.font = "20px Arial";
+    ctx.fillText("Score: " + score, 10, 30);
+}
+
 // Player class
 class Player {
     constructor(x, y, size, speed) {
@@ -19,7 +29,6 @@ class Player {
         if (keys.ArrowUp) newY -= this.speed;
         if (keys.ArrowDown) newY += this.speed;
 
-        // Prevent movement if it would collide with an obstacle
         if (!this.checkCollision(newX, newY)) {
             this.x = newX;
             this.y = newY;
@@ -66,6 +75,7 @@ fetch('objects.json')
     .then(response => response.json())
     .then(data => {
         obstacles = data.map(obj => new Obstacle(obj.x, obj.y, obj.width, obj.height));
+        console.log("Obstacles loaded:", obstacles);  // ✅ Debug log
     })
     .catch(error => console.error("Error loading JSON:", error));
 
@@ -81,6 +91,8 @@ function gameLoop() {
     player.draw();
 
     obstacles.forEach(obstacle => obstacle.draw());
+
+    drawScore(); // ✅ Keeps the score displayed
 
     requestAnimationFrame(gameLoop);
 }
