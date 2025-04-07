@@ -65,37 +65,42 @@ class Obstacle {
     }
 }
 
-// Global Variables
-let player = new Player(50, 50, 30, 5);
-let obstacles = [];
-let keys = {};
+// Collectible class
+class Collectible {
+    constructor(x, y, width, height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.collected = false;
+    }
 
-// Load obstacles from JSON
-fetch('objects.json')
-    .then(response => response.json())
-    .then(data => {
-        obstacles = data.map(obj => new Obstacle(obj.x, obj.y, obj.width, obj.height));
-        console.log("Obstacles loaded:", obstacles);  // ✅ Debug log
-    })
-    .catch(error => console.error("Error loading JSON:", error));
+    draw() {
+        if (!this.collected) {
+            ctx.fillStyle = "blue"; // Collectibles are blue
+            ctx.beginPath();
+            ctx.arc(this.x + this.width / 2, this.y + this.height / 2, this.width / 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
 
-// Key Listeners
-window.addEventListener("keydown", (e) => keys[e.key] = true);
-window.addEventListener("keyup", (e) => keys[e.key] = false);
-
-// Game Loop
-function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    player.move();
-    player.draw();
-
-    obstacles.forEach(obstacle => obstacle.draw());
-
-    drawScore(); // ✅ Keeps the score displayed
-
-    requestAnimationFrame(gameLoop);
+    checkCollision(player) {
+        if (!this.collected) {
+            const distX = Math.abs(player.x + player.size / 2 - (this.x + this.width / 2));
+            const distY = Math.abs(player.y + player.size / 2 - (this.y + this.height / 2));
+            if (distX <= (player.size / 2 + this.width / 2) && distY <= (player.size / 2 + this.height / 2)) {
+                this.collected = true;
+                score += 10; // Increment score
+            }
+        }
+    }
 }
 
-// Start Game
-gameLoop();
+// Global Variables
+let player = new Player(100, 100, 30, 5); // Player starts at position (100, 100)
+let obstacles = [];
+let collectibles = [];
+let keys = {}; // For tracking key presses
+
+// Load obstacles and collectibles from JSON files
+Promise.all([
